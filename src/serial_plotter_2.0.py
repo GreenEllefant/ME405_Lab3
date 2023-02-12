@@ -19,26 +19,27 @@ first two values read are length of data set and chosen gain respectively
 def plotter():
     val_list1 = []
     val_list2 = []                                       
-    with serial.Serial('COM5', 115200, timeout=5) as serialPort:
+    with serial.Serial('COM5', 115200) as serialPort:
         item = serialPort.readline().split(b',')
+        print(item)
         while float(item[1]) != -1.0:
             item = serialPort.readline().split(b',')
             if item[0] == 1:
                 val_list1.append(item)
             else:
                 val_list2.append(item)
-    yield val_list1, val_list2
+    return val_list1, val_list2
             
 def plot_me(lists):
     get_axis = ('Time (in seconds)', 'Position (in encoder ticks)')              #isolate axis titles
     for mot_num in range(1, 2):
         xpoints =[]
         ypoints =[]
-        motor_num = list[mot_num][0]
-        for i in range(len(list[mot_num])-1):
+        motor_num = lists[mot_num][0]
+        for i in range(len(lists[mot_num])-1):
             try:
-                xpoints.append(float(list[mot_num][i][0]))            #add only numerical values to plot list
-                ypoints.append(float(list[mot_num][i][1]))
+                xpoints.append(float(lists[mot_num][i][0]))            #add only numerical values to plot list
+                ypoints.append(float(lists[mot_num][i][1]))
             except ValueError:
                 continue
 
@@ -52,5 +53,5 @@ def main():
     lists = plotter()
     plot_me(lists)
     
-if name == "__main__":
+if __name__ == "__main__":
     main()
