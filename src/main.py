@@ -14,6 +14,7 @@ import gc
 import pyb
 import cotask
 import task_share
+import utime
 from pyb import UART
 pyb.repl_uart(None)
 
@@ -24,18 +25,20 @@ def task1_fun(shares):
     """
     # Get references to the share and queue which have been passed to this task
     my_queue = shares
-
+    i = 0
     counter = 0
     while True:
-        dummy_data=[[1],[10],[0],
-                    [1],[20],[150],
-                    [1],[30],[200],
-                    [1],[40],[50],
-                    [1],[50],[-50],
-                    [1],[-1],[0]]
-        i = 0
-        my_queue.put(f"{dummy_data[0][i]},{dummy_data[1][i]},{dummy_data[2][i]}")
-        i += 1
+        dummy_data=[[1,10,0],
+                    [1,20,50],
+                    [1,30,150],
+                    [1,40,200],
+                    [1,50,-50],
+                    [1,-1,50]]
+        if i < len(dummy_data):
+            data = f"{dummy_data[i][0]},{dummy_data[i][1]},{dummy_data[i][2]}\r\n"
+            for char in data:
+                my_queue.put(ord(char))
+            i += 1
         yield 0
 
 
@@ -46,25 +49,29 @@ def task2_fun(shares):
     """
     # Get references to the share and queue which have been passed to this task
     my_queue = shares
-
+    i = 0
     while True:
         # Show everything currently in the queue and the value in the share
-        dummy_data =   [[2],[10],[0],
-                        [2],[20],[-150],
-                        [2],[30],[-200],
-                        [2],[40],[-50],
-                        [2],[50],[50],
-                        [2],[-1],[0]]
-        i = 0
-        my_queue.put(f"{dummy_data[0][i]},{dummy_data[1][i]},{dummy_data[2][i]}")
-        i += 1 
+        dummy_data =   [[2,10,0],
+                        [2,20,-50],
+                        [2,30,-150],
+                        [2,40,-200],
+                        [2,50,50],
+                        [2,-1,50]]
+        if i < len(dummy_data):
+            data = f"{dummy_data[i][0]},{dummy_data[i][1]},{dummy_data[i][2]}\r\n"
+            for char in data:
+                my_queue.put(ord(char))
+            i += 1
         yield 0
 
 def task3_fun(shares):
     the_queue = shares
     u2 = pyb.UART(2, baudrate=115200)
     while True:
-        u2.write(the_queue.get())
+        if the_queue.any():
+            data = the_queue.get()
+            u2.write(chr(data))
         yield 0
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
@@ -73,6 +80,8 @@ def task3_fun(shares):
 if __name__ == "__main__":
     print("Testing ME405 stuff in cotask.py and task_share.py\r\n"
           "Press Ctrl-C to stop and show diagnostics.")
+    
+    utime.sleep_ms(3000)
 
     # Create a share and a queue to test function and diagnostic printouts
     q0 = task_share.Queue('B', 200, thread_protect=False, overwrite=False,
@@ -82,11 +91,11 @@ if __name__ == "__main__":
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
     # debugging and set trace to False when it's not needed
-    task1 = cotask.Task(task1_fun, name="Task_1", priority=1, period=400,
+    task1 = cotask.Task(task1_fun, name="Task_1", priority=1, period=150,
                         profile=True, trace=False, shares=(q0))
-    task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=1500,
+    task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=150,
                         profile=True, trace=False, shares=(q0))
-    task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=3000, profile=True, trace=False, shares=(q0))
+    task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=10, profile=True, trace=False, shares=(q0))
 
     cotask.task_list.append(task1)
     cotask.task_list.append(task2)
