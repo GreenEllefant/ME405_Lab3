@@ -18,33 +18,39 @@ first two values read are length of data set and chosen gain respectively
 
 def plotter():
     val_list1 = []
-    val_list2 = []                                       
-    with serial.Serial('COM5', 115200) as serialPort:
+    val_list2 = []
+    tot_list = []
+    with serial.Serial('COM5', 115200, timeout=5) as serialPort:
         item = serialPort.readline().split(b',')
         print(item)
         while float(item[1]) != -1.0:
+            print(item)
             item = serialPort.readline().split(b',')
-            if item[0] == 1:
+            if item[0] == b'1':
                 val_list1.append(item)
             else:
                 val_list2.append(item)
-    return val_list1, val_list2
+    
+        tot_list.append(val_list1)
+        tot_list.append(val_list2)
+    return tot_list
             
 def plot_me(lists):
+    print(lists)
     get_axis = ('Time (in seconds)', 'Position (in encoder ticks)')              #isolate axis titles
-    for mot_num in range(1, 2):
+    for mot_num in range(len(lists)):
         xpoints =[]
         ypoints =[]
-        motor_num = lists[mot_num][0]
+        motor_num = lists[mot_num][0][0]
         for i in range(len(lists[mot_num])-1):
             try:
-                xpoints.append(float(lists[mot_num][i][0]))            #add only numerical values to plot list
-                ypoints.append(float(lists[mot_num][i][1]))
+                xpoints.append(float(lists[mot_num][i][1]))            #add only numerical values to plot list
+                ypoints.append(float(lists[mot_num][i][2]))
             except ValueError:
                 continue
 
         pyplot.plot(xpoints, ypoints)           
-        pyplot.title("Impulse Response for Motor ", motor_num)
+        pyplot.title("Impulse Response for Motor " + str(int(motor_num)))
         pyplot.xlabel(get_axis[0])
         pyplot.ylabel(get_axis[1])
         pyplot.show()
