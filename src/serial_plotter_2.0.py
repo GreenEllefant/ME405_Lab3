@@ -20,7 +20,7 @@ def plotter():
     val_list1 = []
     val_list2 = []
     tot_list = []
-    with serial.Serial('COM5', 115200, timeout=5) as serialPort:
+    with serial.Serial('COM5', 115200) as serialPort:
         item = serialPort.readline().split(b',')
         print(item)
         while float(item[1]) != -1.0:
