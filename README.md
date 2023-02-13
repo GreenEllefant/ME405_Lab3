@@ -11,7 +11,7 @@ If one motor is running too slow, the position in code will not reflect the actu
 
 Below are the step responses of each motor running simultaneously. Motor 1 was attempting to reach a position of 8000 while motor 2 was attempting to reach a position of 5000. Each motor ran with a gain value of 0.05. Note that the time is in milliseconds rather than seconds.
 
-<img width="578" alt="Impulse_response_motor1" src="https://user-images.githubusercontent.com/57115504/218598967-d1ffb12c-1384-4dd5-b2a8-7443c0a9964d.png">
+<img width="390" alt="Impulse_response_motor1" src="https://user-images.githubusercontent.com/57115504/218598967-d1ffb12c-1384-4dd5-b2a8-7443c0a9964d.png">
 Image of motor 1 impulse response
 
 <img width="390" alt="Impulse_response_motor2" src="https://user-images.githubusercontent.com/57115504/218599051-6930a792-12e3-48e5-8377-3c79cfdda0b4.png">
