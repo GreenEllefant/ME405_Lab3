@@ -1,13 +1,10 @@
 """!
-@file basic_tasks.py
-    This file contains a demonstration program that runs some tasks, an
-    inter-task shared variable, and a queue. The tasks don't really @b do
-    anything; the example just shows how these elements are created and run.
+@file main.py
+    This file controls two motors to run at the same time. It also sends data to a plotter with data about the motor position.
 
-@author JR Ridgely
-@date   2021-Dec-15 JRR Created from the remains of previous example
-@copyright (c) 2015-2021 by JR Ridgely and released under the GNU
-    Public License, Version 2. 
+@author Jack Ellsworth, Hannah Howe, Mathew Smith
+@date   13-Feb-2023
+@copyright (c) 2023 by Nobody and released under GNU Public License v3
 """
 
 import gc
@@ -23,11 +20,10 @@ pyb.repl_uart(None)
 
 def task1_fun(shares):
     """!
-    Task which puts things into a share and a queue.
-    @param shares A list holding the share and queue used by this task
+    Runs the motor that is connected tp the A0 and A1 pins.
+    @param shares A list holding the queue that contains data to be sent over in task 3
     """
-    # Get references to the share and queue which have been passed to this task
-    # Get references to the share and queue which have been passed to this task
+    # Get references to the queue which have been passed to this task
     my_queue = shares
 
     # Set up encoder for pins C6 and C7
@@ -52,6 +48,7 @@ def task1_fun(shares):
     yield 0
     start = utime.ticks_ms()
     while True:
+        #run for 5 seconds only
         if utime.ticks_ms() - start < 5000:
             c.run(setpoint)
             # Add to the queue for task 3
@@ -60,6 +57,7 @@ def task1_fun(shares):
             for one_char in serial_string:
                 my_queue.put(ord(one_char))
         else:
+            #tell the plotter that we have finished sending data
             serial_string = f"1,-1,0\r\n"
             for one_char in serial_string:
                 my_queue.put(ord(one_char))
@@ -69,10 +67,10 @@ def task1_fun(shares):
 
 def task2_fun(shares):
     """!
-    Task which takes things out of a queue and share and displays them.
-    @param shares A tuple of a share and queue from which this task gets data
+    Runs the motor that is connected tp the B4 and B5 pins.
+    @param shares A list holding the queue that contains data to be sent over in task 3
     """
-    # Get references to the share and queue which have been passed to this task
+    # Get references to the queue which have been passed to this task
     my_queue = shares
 
     # Set up encoder for pins C6 and C7
@@ -90,7 +88,7 @@ def task2_fun(shares):
     
     # Set up control class
     Kp = 0.05       # Motor control parameter
-    setpoint = 8000 # Move to this position
+    setpoint = 5000 # Move to this position
     c1 = Position_Control(Kp, setpoint, e1, m1)
     
     # Verify values were added correctly
@@ -103,6 +101,7 @@ def task2_fun(shares):
     yield 0
     start = utime.ticks_ms()
     while True:
+        #Run for 5 seconds only
         if utime.ticks_ms() - start < 5000:
             c1.run(setpoint)
             # Add to the queue for task 3
@@ -111,12 +110,17 @@ def task2_fun(shares):
             for one_char in serial_string:
                 my_queue.put(ord(one_char))
         else:
+            #tell the plotter that we have finished sending data
             serial_string = f"2,-1,0\r\n"
             for one_char in serial_string:
                 my_queue.put(ord(one_char))
         yield 0
 
 def task3_fun(shares):
+    """!
+    Sends data in the queue to the plotter
+    @param shares A list holding the queue that contains data to be sent to the plotter
+    """
     the_queue = shares
     u2 = pyb.UART(2, baudrate=115200)
     while True:
@@ -125,34 +129,29 @@ def task3_fun(shares):
             u2.write(chr(data))
         yield 0
 
-# This code creates a share, a queue, and two tasks, then starts the tasks. The
-# tasks run until somebody presses ENTER, at which time the scheduler stops and
-# printouts show diagnostic information about the tasks, share, and queue.
 if __name__ == "__main__":
     print("Testing ME405 stuff in cotask.py and task_share.py\r\n"
           "Press Ctrl-C to stop and show diagnostics.")
     
+    #Wait to start program
     utime.sleep_ms(3000)
 
     # Create a share and a queue to test function and diagnostic printouts
     q0 = task_share.Queue('B', 200, thread_protect=False, overwrite=False,
                           name="Queue 0")
 
-    # Create the tasks. If trace is enabled for any task, memory will be
-    # allocated for state transition tracing, and the application will run out
-    # of memory after a while and quit. Therefore, use tracing only for 
-    # debugging and set trace to False when it's not needed
+    # Create the tasks.
     task1 = cotask.Task(task1_fun, name="Task_1", priority=1, period=50,
                          profile=True, trace=False, shares=(q0))
     task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=50,
                         profile=True, trace=False, shares=(q0))
+    #Sending the data needs to run significantly faster so that the queue does not overflow with values.
     task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=1, profile=True, trace=False, shares=(q0))
 
     cotask.task_list.append(task1)
     cotask.task_list.append(task2)
     cotask.task_list.append(task3)
-    # Run the memory garbage collector to ensure memory is as defragmented as
-    # possible before the real-time scheduler is started
+    # Run the memory garbage collector
     gc.collect()
 
     # Run the scheduler with the chosen scheduling algorithm. Quit if ^C pressed
