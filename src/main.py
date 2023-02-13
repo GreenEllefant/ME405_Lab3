@@ -103,21 +103,17 @@ def task2_fun(shares):
     yield 0
     start = utime.ticks_ms()
     while True:
-        c1.setpoint = setpoint
-        c1.values[0] = (utime.ticks_ms() - c1.time)
-        c1.values[1] = (c1.encoder.read())
-        c1.motor.set_duty_cycle(c1.gain * (c1.setpoint - c1.encoder.read()))
-        #if utime.ticks_ms() - start < 5000:
-        #    c1.run(setpoint)
+        if utime.ticks_ms() - start < 5000:
+            c1.run(setpoint)
             # Add to the queue for task 3
-        #    serial_string = f"2,{c1.values[0]},{c1.values[1]}\r\n"
-        #    print(serial_string)
-        #    for one_char in serial_string:
-        #        my_queue.put(ord(one_char))
-        #else:
-        #    serial_string = f"2,-1,0\r\n"
-        #    for one_char in serial_string:
-        #        my_queue.put(ord(one_char))
+            serial_string = f"2,{c1.values[0]},{c1.values[1]}\r\n"
+            print(serial_string)
+            for one_char in serial_string:
+                my_queue.put(ord(one_char))
+        else:
+            serial_string = f"2,-1,0\r\n"
+            for one_char in serial_string:
+                my_queue.put(ord(one_char))
         yield 0
 
 def task3_fun(shares):
@@ -146,13 +142,13 @@ if __name__ == "__main__":
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
     # debugging and set trace to False when it's not needed
-    #task1 = cotask.Task(task1_fun, name="Task_1", priority=1, period=50,
-#                         profile=True, trace=False, shares=(q0))
+    task1 = cotask.Task(task1_fun, name="Task_1", priority=1, period=50,
+                         profile=True, trace=False, shares=(q0))
     task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=50,
                         profile=True, trace=False, shares=(q0))
     task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=1, profile=True, trace=False, shares=(q0))
 
-    #cotask.task_list.append(task1)
+    cotask.task_list.append(task1)
     cotask.task_list.append(task2)
     cotask.task_list.append(task3)
     # Run the memory garbage collector to ensure memory is as defragmented as
