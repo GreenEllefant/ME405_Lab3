@@ -93,11 +93,20 @@ def task2_fun(shares):
     setpoint = 8000 # Move to this position
     c1 = Position_Control(Kp, setpoint, e1, m1)
     
+    # Verify values were added correctly
+    print(c1.gain)
+    yield 0
+    print(c1.setpoint)
+    
+    
     # Pause before running the motor
     yield 0
     start = utime.ticks_ms()
     while True:
-        c1.motor.set_duty_cycle(50)
+        c1.setpoint = setpoint
+        c1.values[0] = (utime.ticks_ms() - c1.time)
+        c1.values[1] = (c1.encoder.read())
+        c1.motor.set_duty_cycle(c1.gain * (c1.setpoint - c1.encoder.read()))
         #if utime.ticks_ms() - start < 5000:
         #    c1.run(setpoint)
             # Add to the queue for task 3
