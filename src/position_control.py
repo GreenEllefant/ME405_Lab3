@@ -1,4 +1,4 @@
-"""! 
+"""! @file position_control.py
     This file contains the Position Control class
     
     @author Jack Ellsworth, Hannah Howe, Mathew Smith
@@ -30,10 +30,10 @@ class Position_Control:
     def run(self, setpoint):
         """! 
         Updates the system parameters
-        @param gain: sets the gain from the controller
-        @param setpoint: sets the initial setpoint for the controller
-        @param encoder: takes an encoder_reader class for the system
-        @param motor: takes a motor_driver class for the system
+        @param gain sets the gain from the controller
+        @param setpoint sets the initial setpoint for the controller
+        @param encoder takes an encoder_reader class for the system
+        @param motor takes a motor_driver class for the system
         """
         self.setpoint = setpoint
         self.values[0] = (utime.ticks_ms() - self.time)
@@ -50,13 +50,13 @@ class Position_Control:
     def set_setpoint(self, setpoint):
         """!
         Sets a new setpoint
-        @param setpoint: The new setpoint
+        @param setpoint The new setpoint
         """
         self.setpoint = setpoint
     
     def set_Kp(self, gain):
         """!
         Sets a new controller gain
-        @param gain: The new controller gain
+        @param gain The new controller gain
         """
         self.gain = gain

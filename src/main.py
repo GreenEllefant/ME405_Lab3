@@ -130,8 +130,6 @@ def task3_fun(shares):
         yield 0
 
 if __name__ == "__main__":
-    print("Testing ME405 stuff in cotask.py and task_share.py\r\n"
-          "Press Ctrl-C to stop and show diagnostics.")
     
     #Wait to start program
     utime.sleep_ms(3000)

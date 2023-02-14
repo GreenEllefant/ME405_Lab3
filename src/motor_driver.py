@@ -1,4 +1,4 @@
-"""! @motor_driver.py
+"""! @file motor_driver.py
     This file contains a motor driver for an ME405 kit. 
     
     @author Jack Ellsworth, Hannah Howe, Mathew Smith
@@ -30,7 +30,6 @@ class Motor_Driver:
         self.en_pin.high()
         self.ch1.pulse_width_percent(0)
         self.ch2.pulse_width_percent(0)
-        print ("Creating a motor driver")
 
     def set_duty_cycle (self, level):
         """!

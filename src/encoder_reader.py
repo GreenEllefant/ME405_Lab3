@@ -1,4 +1,4 @@
-"""! @encoder_class.py
+"""! @file encoder_class.py
 This file contains code definitions for encoder behavior. 
 
 @author Jack Ellsworth, Hannah Howe, Mathew Smith
@@ -32,7 +32,7 @@ class Encoder_Reader:
 
     def read(self):
         """!
-        @details: this function returns the new posistion of the encoder based on
+        @details this function returns the new posistion of the encoder based on
         its previous position
         """
         self.prev_pos = self.timer4.counter() 
@@ -40,19 +40,18 @@ class Encoder_Reader:
 
     def zero(self):
         """!
-        @details: this function zeros the encoder value, resetting it to 0
+        @details this function zeros the encoder value, resetting it to 0
         """
         self.reference_count = self.timer4.counter()
 
     
     def handleflow(self, tim):
         """!
-        @details: this function controls the response of overflow or underflow on the encoder
+        @details this function controls the response of overflow or underflow on the encoder
         starts count over after 1 full rotation
         recognizes when the encoder moves backwards
         """
         current = self.timer4.counter()
-        print("Hello World: ",current)
         if(current < self.prev_pos):
             self.reference_count -= 0xFFFF
         else:
